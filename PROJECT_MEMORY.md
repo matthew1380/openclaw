@@ -192,3 +192,17 @@ Whenever the project changes, update:
 - `CHANGELOG.md`
 - `DECISIONS.md`
 - `DATABASE_SCHEMA.md` if schema or modeling changes
+
+ ### Locked Shaxi grouping rule
+For operational purposes:
+- 下泽村 and 港园村 belong to the same Shaxi industrial estate
+- Shaxi has one industrial estate: 沙溪兴工路39号工业园
+- Shaxi has one residential site: 沙溪宝翠园
+- The industrial estate has three sections:
+  - 建泰
+  - 利生
+  - 佳達洗水
+
+Therefore Shaxi top-level property grouping must be:
+1. 沙溪兴工路39号工业园
+2. 沙溪宝翠园
