@@ -206,3 +206,7 @@ For operational purposes:
 Therefore Shaxi top-level property grouping must be:
 1. 沙溪兴工路39号工业园
 2. 沙溪宝翠园
+
+### Contract section labeling rule
+For Shaxi lease-package contracts, `section_group_name` is an operational helper label only.
+If a contract spans multiple sections, the label may reflect the first or dominant matched section and must not be treated as perfect physical truth.
