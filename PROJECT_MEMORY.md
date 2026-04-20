@@ -210,3 +210,9 @@ Therefore Shaxi top-level property grouping must be:
 ### Contract section labeling rule
 For Shaxi lease-package contracts, `section_group_name` is an operational helper label only.
 If a contract spans multiple sections, the label may reflect the first or dominant matched section and must not be treated as perfect physical truth.
+
+
+### Overdue seed rule
+For the current MVP, Shaxi overdue records inserted on 2026-04-20 are seeded YTD gap backlog records derived from the current rent summary file, not final month-by-month accounting truth.
+Matched SX-39 rows may be stored in `financial_records` as `record_type = rent`, `direction = income`, `status = pending`, with notes marking them as `seed_type=overdue_seed`.
+Unmatched `SX-BCY` shop rows remain in review until the BCY contract layer is built.
