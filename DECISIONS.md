@@ -71,3 +71,11 @@ Decision:
   - 沙溪兴工路39号工业园
   - 沙溪宝翠园
 - 建泰 / 利生 / 佳達洗水 should be modeled as sub-sections or later building/inventory grouping, not top-level properties
+
+## 2026-04-20 — Shaxi overdue seed decision
+Decision:
+- Keep the existing 13 Shaxi lease-package units and 13 contracts
+- Do not rebuild them
+- Use the 2026 rent summary to create a first-pass YTD overdue seed
+- Insert only matched SX-39 high-confidence overdue rows into financial_records
+- Keep unmatched SX-BCY shop rows in review until the BCY contract layer is built
