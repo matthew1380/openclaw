@@ -27,3 +27,26 @@
 - Corrected `SX-C-011` and `SX-C-012` from old `三区A` interpretation to `四区A` current physical truth
 - Created preferred physical-area logic for Shaxi current operational truth
 - Reduced Shaxi unresolved cleanup queue to a small set of review items (`SX-C-006`, `SX-C-008`, `SX-C-010`)
+- Added `scripts/rent_summary_cleaner.py` for staging rent summary CSV cleanup with review queue routing
+- Added `scripts/vacancy_summary_cleaner.py` for vacancy/occupancy reporting from area and contract CSVs
+- Added `scripts/shaxi_parcel_building_mapper.py` for mapping raw Chinese location strings to normalized parcel/building/area codes
+- Updated `AGENTS.md` repo structure to reflect new `scripts/` directory
+
+## 2026-04-21 (revised scripts)
+- Revised `scripts/rent_summary_cleaner.py` to match real pilot fields:
+  `property_code_hint`, `rent_collector`, `property_group`, `tenant_name`,
+  `paying_unit_text`, `monthly_rent_due`, `received_ytd`, `expected_rent_ytd_simple`,
+  `ytd_gap_simple`, `overdue_confidence`, `remarks`.
+  - Never guesses `unit_code` or `contract_code`.
+  - Normalizes `overdue_confidence` flexibly to high/medium/low/unknown;
+    unmapped values route to review queue.
+  - Cross-checks `ytd_gap_simple` against `expected - received`.
+- Revised `scripts/shaxi_parcel_building_mapper.py` to treat broad vague remainders
+  (e.g. `主租区域`, `整栋`, `首层及2至4楼` without card specificity) as
+  low-confidence review items. Consolidated duplicate regex logic.
+- Revised `scripts/vacancy_summary_cleaner.py`:
+  - Understands contract hierarchy (`direct_lease`, `master_lease`, `sublease`).
+  - Master/sub overlap marked `occupied` only when component roles confirm
+    structural expectation (`primary` master + `component`/`corrected_component` subleases).
+  - Outputs readable `unit_code`; requires `--units` CSV if `contracts.csv` lacks `unit_code`.
+  - Documents expected input CSV schemas in script docstring.
