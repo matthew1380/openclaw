@@ -1,5 +1,38 @@
 # CHANGELOG.md
 
+## 2026-04-22
+
+- Set up Kimi Code in VS Code and confirmed repo-based workflow is working.
+- Added and refined 3 local cleanup / preparation scripts:
+  - `scripts/rent_summary_cleaner.py`
+  - `scripts/shaxi_parcel_building_mapper.py`
+  - `scripts/vacancy_summary_cleaner.py`
+- Completed real mini-batch tests for all 3 scripts.
+- Refined `rent_summary_cleaner.py` to support real Shaxi confidence labels:
+  - `high_confidence_candidate` now maps to clean/high
+  - `needs_manual_review` remains review-triggering
+- Refined `shaxi_parcel_building_mapper.py` to normalize full-address Shaxi strings before matching:
+  - removes common site prefix
+  - converts parcel brackets like `（三区）` to `三区`
+  - removes `【原...】` legacy suffixes
+  - normalizes floor wording such as `二层 -> 2层`
+  - keeps broad bundled descriptions in review
+- Refined `vacancy_summary_cleaner.py` so broad area names are marked `unclear` even when only one active contract exists.
+- Real mini-batch results:
+  - rent summary cleaner: `3 cleaned / 1 review`
+  - Shaxi mapper: precise rows mapped, broad bundled rows stayed in review
+  - vacancy cleaner: `20 occupied / 0 vacant / 6 unclear`
+- Created local workflow folders:
+  - `imports/raw/`
+  - `imports/cleaned/`
+  - `imports/review/`
+- Added `.gitignore` rules so local import/test data is not committed.
+- Converted uploaded Excel workbooks to CSV and copied selected raw inputs into `imports/raw/`.
+- Built `imports/raw/shaxi_contracts_raw.csv` from Shaxi tenant CSVs.
+- Built `imports/raw/shaxi_area_skeleton_raw.csv` from Shaxi building CSVs using corrected source-column mapping.
+- Built `imports/raw/locations.csv` from `shaxi_contracts_raw.csv` and ran mapping successfully.
+- Confirmed GitHub is up to date after script/doc commits.
+
 ## 2026-04-18
 - Created initial project restart documentation
 - Defined Rental OS as the first project scope
