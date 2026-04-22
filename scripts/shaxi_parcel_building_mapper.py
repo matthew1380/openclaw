@@ -76,6 +76,16 @@ def classify_remainder(remainder: str) -> tuple[str, str]:
 
     r = remainder.strip()
 
+    # Long compound descriptions with multiple metric indicators are low confidence
+    compound_indicators = [
+        "平方米" in r,
+        "停车位" in r,
+        bool(re.search(r"\d+[-至]\d+[层楼]", r)) or bool(re.search(r"首层及", r)),
+        bool(re.search(r"\d+间房", r)),
+    ]
+    if sum(compound_indicators) >= 2:
+        return "low", "compound_description_mixed_metrics"
+
     # Specific card/room patterns indicate high confidence
     has_specific_card = bool(re.search(r"\d+卡|\d+房", r))
     if has_specific_card:

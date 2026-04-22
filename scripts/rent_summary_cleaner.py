@@ -72,7 +72,7 @@ def normalize_confidence(value: str) -> tuple[str | None, bool]:
     if not s:
         return "unknown", True
 
-    high_vals = {"confirmed", "high", "高", "yes", "sure", "definite", "确定", "确认"}
+    high_vals = {"confirmed", "high", "high_confidence_candidate", "高", "yes", "sure", "definite", "确定", "确认"}
     medium_vals = {"estimated", "medium", "中", "partial", "likely", "probably", "估计", "可能"}
     low_vals = {"low", "低", "weak", "doubtful", "unlikely", "maybe", "弱", "不确定"}
     unknown_vals = {"unknown", "未知", "none", "no", "na", "n/a", "nil", "null", "无"}

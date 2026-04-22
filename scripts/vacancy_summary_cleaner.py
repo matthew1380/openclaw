@@ -46,6 +46,7 @@ Rules:
 
 import argparse
 import csv
+import re
 import sys
 from pathlib import Path
 from datetime import date
@@ -159,6 +160,22 @@ def build_unit_code_map(units: list[dict]) -> dict[str, str]:
     }
 
 
+def is_broad_area_name(name: str) -> bool:
+    """Return True when area_name indicates an unresolved or overly broad scope."""
+    if not name:
+        return False
+    # Explicit broad markers
+    if any(marker in name for marker in ("主租区域", "整栋", "全部")):
+        return True
+    # Compound multi-floor labels, e.g. 首层及2至4楼, 2层至4楼, 2-4楼
+    if re.search(r"(首层|\d+[层楼樓]?).*?[及至-].*?\d+[层楼樓]", name):
+        return True
+    # Multi-building bundles, e.g. A栋、B栋 or 1栋及2栋
+    if re.search(r"栋.*[及、,].*栋", name):
+        return True
+    return False
+
+
 def determine_area_status(
     area: dict,
     area_components: list[dict],
@@ -201,6 +218,12 @@ def determine_area_status(
         if inactive_reasons:
             return "vacant", [], "linked contracts inactive: " + "; ".join(inactive_reasons)
         return "vacant", [], "no active contract links"
+
+    # Business rule: broad / unresolved area names are operationally unclear
+    # even when linked to a single active contract.
+    area_name = area.get("area_name", "").strip()
+    if is_broad_area_name(area_name):
+        return "unclear", active_links, f"area name indicates unresolved scope: {area_name}"
 
     # Single active link -> occupied
     if len(active_links) == 1:
