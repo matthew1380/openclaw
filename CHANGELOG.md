@@ -1,5 +1,52 @@
 # CHANGELOG.md
 
+## 2026-04-23
+
+- Tooling and workflow baseline complete:
+  - Kimi Code confirmed working in VS Code
+  - GitHub workflow confirmed working
+  - Local workflow folders established: `imports/raw/`, `imports/cleaned/`, `imports/review/`
+  - `.gitignore` excludes local batch/import files
+- Script status: `rent_summary_cleaner.py`, `shaxi_parcel_building_mapper.py`, `vacancy_summary_cleaner.py` are stable for current stage.
+- Script refinements:
+  - `rent_summary_cleaner.py`: supports real Shaxi confidence labels; `high_confidence_candidate` treated as clean/high; `needs_manual_review` remains review-triggering
+  - `shaxi_parcel_building_mapper.py`: normalizes full-address Shaxi strings before matching (removes common site prefix, converts parcel brackets like `（三区）` -> `三区`, removes `【原...】` legacy suffixes, normalizes floor wording such as `二层` -> `2层`); broad bundled descriptions still sent to review
+  - `vacancy_summary_cleaner.py`: broad area names marked unclear even with only one active contract
+- Raw source preparation completed:
+  - `imports/raw/shaxi_contracts_raw.csv` — combined from `shaxi_tenants_zhongming.csv` + `shaxi_tenants_jingda.csv`; blank rows and instruction rows removed
+  - `imports/raw/shaxi_area_skeleton_raw.csv` — combined from `shaxi_buildings_zhongming.csv` + `shaxi_buildings_jingda.csv`; correct source columns used
+  - `imports/raw/locations.csv` — extracted from `shaxi_contracts_raw.csv`
+- Cleaned / review outputs created and verified:
+  - `imports/cleaned/shaxi_mapped_locations.csv`
+  - `imports/review/shaxi_mapping_review_queue.csv`
+  - `imports/cleaned/shaxi_contracts_prepared.csv`
+  - `imports/review/shaxi_contracts_mapping_review.csv`
+  - `imports/cleaned/shaxi_area_skeleton_prepared.csv`
+  - `imports/review/shaxi_area_skeleton_review.csv`
+- Prepared contract logic completed:
+  - Excel serial dates converted to ISO dates
+  - Mapped fields attached from `shaxi_mapped_locations.csv`
+  - Low-confidence/broad bundle rows preserved but marked `review_required`
+  - Precise mapped rows marked `mapped`
+- Prepared area logic completed:
+  - Current parcel/building inferred from `property_internal_name` where possible
+  - Building scope normalized from `building_name_raw`
+  - Broad floor-range rows remain `review_required`
+  - Precise rows such as `首层` / `首层1卡` / `夹层` are prepared
+  - Known unresolved row remains: `一区 原建泰第1座` still `review_required` because current parcel/building inference for that legacy naming is not yet handled
+- Stage-ready exports completed:
+  - `imports/cleaned/shaxi_contracts_stage_ready.csv` (10 rows)
+  - `imports/cleaned/shaxi_area_stage_ready.csv` (14 rows)
+  - `imports/cleaned/shaxi_area_stage_canonical.csv` (11 rows)
+- Supabase staging completed:
+  - Created and loaded `public.stg_shaxi_contracts_prepared` (10 rows)
+  - Created and loaded `public.stg_shaxi_areas_prepared` (11 rows)
+- Current interpretation / business rules recorded:
+  - Broad bundle rows stay out of stage-ready contract import
+  - Broad floor-range area rows stay out of stage-ready area import
+  - Shaxi remains the active pilot site
+  - Current work is still a preparation/staging pipeline, not final promotion into all final truth tables
+
 ## 2026-04-22
 
 - Set up Kimi Code in VS Code and confirmed repo-based workflow is working.
