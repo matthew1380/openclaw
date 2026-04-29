@@ -2,3 +2,6 @@ mini_batch/
 imports/raw/
 imports/cleaned/
 imports/review/
+.env
+.env.*
+reports/

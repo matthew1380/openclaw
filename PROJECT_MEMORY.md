@@ -1,9 +1,9 @@
 # PROJECT_MEMORY.md
 
-## Current Working State (2026-04-27)
+## Current Working State (2026-04-29)
 
-### Shaxi pilot status — post v2.5
-The Shaxi promotion pipeline is now **live through safe lease_package_components creation with staff approval workflow, issued bills, payment recording views, Streamlit staff operating interface, and business exception resolution workflow**.
+### Shaxi pilot status — post v2.6
+The Shaxi promotion pipeline is now **live through safe lease_package_components creation with staff approval workflow, issued bills (8 for May 2026), payment recording views, Streamlit staff operating interface, business exception resolution workflow, and applied exception decisions (v2.6)**.
 
 Staging is complete. Promotion into final truth tables is in progress with strict review-first rules.
 
@@ -125,12 +125,12 @@ All promoted data uses batch identifier: **`shaxi_promotion_v1`**
 **Billing foundation tables:**
 | Table | Purpose | Status |
 |-------|---------|--------|
-| `rent_bills` | Expected rental charges | 7 issued + 1 draft for 2026-05-01 |
+| `rent_bills` | Expected rental charges | 8 issued + 0 draft for 2026-05-01 |
 | `payments` | Actual money received | Empty, ready for entry |
 | `payment_allocations` | Connect payments to bills | Empty, ready for entry |
 | `billing_generation_rules` | Controls bill generation | 1 rule: SX-39, 2026-05-01, rent, due_day=5, status=generated |
-| `bill_approval_reviews` | Staff approval workflow | 8 rows (7 approved, 1 pending_review) |
-| `shaxi_business_exception_reviews` | Business exception resolution workflow | 3 rows (all pending_decision) |
+| `bill_approval_reviews` | Staff approval workflow | 8 rows (8 approved, 0 pending_review) |
+| `shaxi_business_exception_reviews` | Business exception resolution workflow | 3 rows (1 pending_decision / 1 keep_on_hold / 1 approved_to_issue) |
 
 **Billing views:**
 | View | Purpose | Rows |
@@ -158,11 +158,11 @@ All promoted data uses batch identifier: **`shaxi_promotion_v1`**
 - `scripts/requirements.txt` — `streamlit` dependency
 - `docs/SHAXI_STAFF_INTERFACE_V2_4.md` — interface documentation
 
-**Issued bills:**
-- 7 May 2026 rent bills issued for: 素语服饰, 陈盼, 兼熙服饰, 嘉睿服饰(3层), 鲸鸣服饰, 珍美商贸, 嘉睿服饰(1层3卡)
-- 1 draft bill remains: 杨华禾 (pending_review, review_before_approve)
-- Total issued amount: ¥327,422.00
-- Total outstanding: ¥327,422.00 (0 payments recorded)
+**Issued bills (after v2.6):**
+- 8 May 2026 rent bills issued for: 素语服饰, 陈盼, 兼熙服饰, 嘉睿服饰(3层), 鲸鸣服饰, 珍美商贸, 嘉睿服饰(1层3卡), **杨华禾 (issued in v2.6, ¥2,500.00)**
+- 0 draft bills remain
+- Total issued amount: ¥329,922.00
+- Total outstanding: ¥329,922.00 (0 payments recorded)
 
 **Known billing holds (tracked in `shaxi_business_exception_reviews`):**
 - 川田 (四区B栋首层) — `billing_hold`: multiple_active area (靖大物业 master lease + 川田 sublease)
@@ -240,6 +240,8 @@ All promoted data uses batch identifier: **`shaxi_promotion_v1`**
 | 31 | `sql/31_verify_shaxi_staff_interface_support_v2_4.sql` | Verify staff interface support views | ✅ Active |
 | 32 | `sql/32_create_shaxi_exception_resolution_workflow_v2_5.sql` | Create exception resolution table + views | ✅ Executed |
 | 33 | `sql/33_verify_shaxi_exception_resolution_workflow_v2_5.sql` | Verify exception resolution workflow | ✅ Active |
+| 34 | `sql/34_apply_shaxi_exception_decisions_v2_6.sql` | Apply confirmed exception decisions (川田 keep_on_hold, 杨华禾 approved_to_issue + bill issued, 朱河芳 unchanged) | ✅ Executed |
+| 35 | `sql/35_verify_shaxi_exception_decisions_v2_6.sql` | Verify v2.6 decisions (31 checks, ALL PASSED) | ✅ Active |
 | — | `scripts/generate_shaxi_bill_review_page.py` | Generate static HTML bill review page | ✅ Active |
 | — | `scripts/shaxi_staff_app.py` | Streamlit staff operating interface | ✅ Active |
 | — | `scripts/requirements.txt` | Python dependencies | ✅ Active |
@@ -276,11 +278,12 @@ Stable enough for current stage:
 
 ---
 
-### Known unresolved items
-1. **3 business exceptions** tracked in `shaxi_business_exception_reviews` awaiting human decision:
-   - 川田 (四区B栋首层) — `billing_hold`: multiple_active area (靖大物业 master lease + 川田 sublease)
-   - 朱河芳 (三区A栋首层2卡) — `expired`: contract SX-C-011 ends 2026-04-30, not valid for 2026-05-01 billing
-   - 杨华禾 (三区A栋首层1卡) — `pending_draft_bill`: draft bill ¥2,500.00 pending rent amount confirmation
+### Known unresolved items (after v2.6)
+1. **1 business exception** still `pending_decision` in `shaxi_business_exception_reviews`:
+   - 朱河芳 (三区A栋首层2卡) — `expired_contract`: contract SX-C-011 ended 2026-04-30. Renewal pending with 阮绮杨 follow-up. **Do not bill until confirmed.**
+2. **1 business exception** on hold pending external confirmation:
+   - 中山市川田制衣厂 (四区B栋首层) — `keep_on_hold` (decided in v2.6): 川田 pays 靖大物业 → 靖大物业 pays 中铭. Future billing must happen at 靖大物业/master-lease level once master rent + rule are confirmed. **No direct 中铭 → 川田 bill.**
+3. **0 unresolved draft bills.** 杨华禾 was approved + issued in v2.6 (¥2,500.00).
 
 2. **Legacy long-name rentable_areas** exist alongside new canonical short-name areas:
    - e.g., `RA-ZS-SX-U012` (long) vs `RA-SX39-Q4-B-GF` (short) for 四区B栋首层
@@ -292,4 +295,4 @@ Stable enough for current stage:
 ---
 
 ### Immediate next deliverable
-Record actual payments against issued bills using the Streamlit interface or manual SQL, resolve held cases (川田 master/sublease, 朱河芳 renewal), approve 杨华禾 when rent is confirmed, or make exception decisions via the `shaxi_business_exception_reviews` table. Do not expand to other sites until Shaxi has a reliable staff-facing review loop AND trusted operating data.
+Record actual payments against the 8 issued May 2026 bills (¥329,922.00 receivable) using the Streamlit interface or manual SQL. In parallel, resolve 朱河芳 once 阮绮杨 confirms renewal/vacancy. Confirm 川田 master-lease rent + rule at the 靖大物业 level (no direct 中铭 → 川田 bill). Do not expand to SX-BCY until Shaxi has a reliable staff-facing review loop AND trusted operating data.

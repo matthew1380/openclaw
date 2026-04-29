@@ -1,10 +1,10 @@
-# Shaxi Rental OS Handover — Current State After v2.5
+# Shaxi Rental OS Handover — Current State After v2.6
 
-_Last updated: 2026-04-28 after creating business exception resolution workflow_
+_Last updated: 2026-04-29 after applying confirmed business exception decisions_
 
 ## 1. Current Milestone
 
-The Shaxi Rental OS pilot has reached the **v2.5 business-exception-resolution checkpoint**.
+The Shaxi Rental OS pilot has reached the **v2.6 exception-decisions-applied checkpoint**.
 
 All 9 promotion candidates have been resolved:
 - 6 approved in v1.3/v1.4
@@ -20,9 +20,10 @@ Staff-facing reporting views, operating-data views, billing foundation, controll
 - 7 normal bills approved and issued. 1 bill (杨华禾) remains draft/pending. (v2.2)
 - Outstanding bills view, payment recording queue, payment allocation exceptions (v2.3)
 - Streamlit staff interface for payment recording and dashboard (v2.4)
-- **Business exception resolution workflow: 3 active reviews (川田, 朱河芳, 杨华禾) (v2.5)**
+- Business exception resolution workflow: 3 active reviews (川田, 朱河芳, 杨华禾) (v2.5)
+- **Confirmed exception decisions applied: 川田 keep_on_hold, 杨华禾 approved_to_issue (bill issued, ¥2,500), 朱河芳 unchanged (v2.6)**
 
-The system has safely moved from raw/staged Shaxi data into verified structured rental components with staff visibility, controlled billing, human-review queue, explicit approval gate, issued bills with full traceability, and **structured business exception tracking**. Zero unresolved candidates remain.
+The system has safely moved from raw/staged Shaxi data into verified structured rental components with staff visibility, controlled billing, human-review queue, explicit approval gate, 8 issued bills with full traceability, structured business exception tracking, and **applied human decisions on those exceptions**. Zero unresolved candidates remain. Zero remaining draft bills.
 
 ---
 
@@ -41,22 +42,24 @@ The system has safely moved from raw/staged Shaxi data into verified structured 
 | Occupied areas | 34 |
 | Areas with no component | 9 |
 | Multiple-active areas | 1 |
-| Draft rent bills (2026-05-01) | 1 |
-| Issued rent bills (2026-05-01) | 7 |
-| Bills in review queue | 1 |
-| Approval records (approved) | 7 |
-| Approval records (pending_review) | 1 |
+| Draft rent bills (2026-05-01) | 0 |
+| Issued rent bills (2026-05-01) | 8 |
+| Bills in review queue | 0 |
+| Approval records (approved) | 8 |
+| Approval records (pending_review) | 0 |
 | Approval records (rejected) | 0 |
 | Approval records (needs_adjustment) | 0 |
 | Issue-ready bills | 0 |
-| Billing holds | 2 |
+| Billing holds (true holds, unbilled) | 2 |
 | Business exception reviews | 3 |
-| Exception reviews pending_decision | 3 |
+| Exception reviews pending_decision | 1 (朱河芳) |
+| Exception reviews keep_on_hold | 1 (川田) |
+| Exception reviews approved_to_issue | 1 (杨华禾) |
 | Exception reviews resolved | 0 |
 | Payments recorded | 0 |
 | Payment allocations recorded | 0 |
-| Total issued amount | ¥327,422.00 |
-| Total outstanding amount | ¥327,422.00 |
+| Total issued amount | ¥329,922.00 |
+| Total outstanding amount | ¥329,922.00 |
 
 ---
 
@@ -83,20 +86,25 @@ The system has safely moved from raw/staged Shaxi data into verified structured 
 | 川田 | 四区B栋首层 | billing_hold | multiple_active — 靖大物业 master lease + 川田 sublease | resolve_master_sublease_billing_rule |
 | 朱河芳 | 三区A栋首层2卡 | expired | contract SX-C-011 ends 2026-04-30 | confirm_renewal_or_vacancy |
 
-## 5. Business Exception Reviews (3)
+## 5. Business Exception Reviews (3) — post v2.6
 
-| Tenant | Area | Exception Type | Current Status | Decision Status | Recommended Action |
-|---|---|---|---|---|---|
-| 中山市川田制衣厂 | 四区B栋首层 | billing_hold | billing_hold | pending_decision | Decide master/sublease billing rule for 四区B栋首层 (靖大物业 + 川田) |
-| 朱河芳 | 三区A栋首层2卡 | expired_contract | expired | pending_decision | Confirm renewal or mark vacant for 三区A栋首层2卡 |
-| 杨华禾 | 三区A栋首层1卡 | pending_draft_bill | draft_pending_review | pending_decision | Confirm rent amount before approving 杨华禾 May 2026 bill |
+| Tenant | Area | Exception Type | Current Status | Decision Status | Decided By | Recommended Action |
+|---|---|---|---|---|---|---|
+| 中山市川田制衣厂 | 四区B栋首层 | billing_hold | billing_hold | **keep_on_hold** | Matthew/admin (2026-04-29) | Confirm master lease rent + rule at 靖大物业 level. NO direct 中铭 → 川田 bill. |
+| 朱河芳 | 三区A栋首层2卡 | expired_contract | expired | pending_decision | — | Confirm renewal or mark vacant for 三区A栋首层2卡 (阮绮杨 follow-up) |
+| 杨华禾 | 三区A栋首层1卡 | pending_draft_bill | draft_pending_review | **approved_to_issue** | Matthew/admin (2026-04-29) | Bill issued ¥2,500.00 in v2.6 |
 
-All 3 exceptions are tracked in `shaxi_business_exception_reviews` with `decision_status = 'pending_decision'`.
+All 3 exceptions are tracked in `shaxi_business_exception_reviews`. Workflow status: `exceptions_pending_decision` (because 朱河芳 is still pending).
 Allowed decisions: `pending_decision`, `approved_to_bill`, `approved_to_issue`, `keep_on_hold`, `mark_vacant`, `renewed_contract_needed`, `needs_adjustment`, `resolved`.
+
+**v2.6 decision details:**
+- 川田: `pending_decision` → `keep_on_hold`. decision_note: "川田 pays rent to 靖大物业; 靖大物业 pays 中铭. Do not issue direct rent bill from 中铭 to 川田 unless policy changes. Future billing should be handled at 靖大物业/master-lease level if confirmed."
+- 杨华禾: `pending_decision` → `approved_to_issue`. Existing draft bill `4adcf5d2…` moved from `draft` → `issued`; bill_approval_reviews.review_status `pending_review` → `approved`.
+- 朱河芳: NO CHANGE. Stays `pending_decision`.
 
 ---
 
-## 6. Issued Bills (7)
+## 6. Issued Bills (8) — post v2.6
 
 | Tenant | Area | Amount | Status | Approved By |
 |---|---|---:|---|---|
@@ -107,14 +115,15 @@ Allowed decisions: `pending_decision`, `approved_to_bill`, `approved_to_issue`, 
 | 中山市鲸鸣服饰有限公司 | 三区A栋4层 | ¥40,640.36 | issued | Matthew/admin |
 | 中山市珍美商贸有限公司 | 三区A栋1层1卡 | ¥36,302.77 | issued | Matthew/admin |
 | 中山市嘉睿服饰有限公司 | 三区A栋1层3卡 | ¥21,973.11 | issued | Matthew/admin |
+| **杨华禾** | **三区A栋首层1卡** | **¥2,500.00** | **issued (v2.6)** | **Matthew/admin** |
+
+**Total issued: ¥329,922.00. All 8 bills outstanding (0 payments recorded).**
 
 ---
 
-## 7. Remaining Draft Bill (1)
+## 7. Remaining Draft Bills (0)
 
-| Tenant | Area | Amount | Status | Recommendation |
-|---|---|---:|---|---|
-| 杨华禾 | 三区A栋首层1卡 | ¥2,500.00 | draft | review_before_approve |
+No draft bills remain for 2026-05-01 rent. The single previous draft (杨华禾) was approved and issued in v2.6.
 
 ---
 
@@ -155,6 +164,8 @@ sql/30_verify_shaxi_payment_allocations_v2_3.sql
 sql/31_verify_shaxi_staff_interface_support_v2_4.sql
 sql/32_create_shaxi_exception_resolution_workflow_v2_5.sql
 sql/33_verify_shaxi_exception_resolution_workflow_v2_5.sql
+sql/34_apply_shaxi_exception_decisions_v2_6.sql
+sql/35_verify_shaxi_exception_decisions_v2_6.sql
 ```
 
 Recommended use:
@@ -226,9 +237,10 @@ Start with:
 psql $dbUrl -f sql/03_verify_shaxi_v1.sql
 psql $dbUrl -f sql/31_verify_shaxi_staff_interface_support_v2_4.sql
 psql $dbUrl -f sql/33_verify_shaxi_exception_resolution_workflow_v2_5.sql
+psql $dbUrl -f sql/35_verify_shaxi_exception_decisions_v2_6.sql
 ```
 
-### Current priority: Record Actual Payments, Resolve Held Cases, Approve 杨华禾, or Make Exception Decisions
+### Current priority (post v2.6): Record Actual Payments, Resolve 朱河芳 Renewal, or Confirm 川田 Master-Lease Rule
 
 2. **Current staff views available:**
    - `vw_shaxi_lease_component_review` — 10 safe components with tenant/contract/area detail
@@ -291,9 +303,9 @@ The Shaxi workflow must follow these rules strictly:
 
 ---
 
-## 11. Current State Summary for New Session
+## 11. Current State Summary for New Session — post v2.6
 
-Shaxi Rental OS v2.4 has safely resolved all 9 candidates, created 10 clean lease_package_components, built staff operating views, established a billing foundation, generated 8 controlled draft rent bills, created a human-review queue, produced the first staff-facing HTML review page, established an approval workflow gate, issued 7 normal May 2026 rent bills, created payment recording views, and **built a Streamlit staff operating interface for payment recording**.
+Shaxi Rental OS v2.6 has safely resolved all 9 candidates, created 10 clean lease_package_components, built staff operating views, established a billing foundation, generated and issued **8** May 2026 rent bills (¥329,922.00 receivable), created a human-review queue, produced the staff-facing HTML review page, established an approval workflow gate, created payment recording views, built a Streamlit staff operating interface for payment recording, **structured business exception tracking, and applied the 3 confirmed exception decisions**.
 
 Current clean state:
 - 10 contracts verified (staged).
@@ -305,35 +317,26 @@ Current clean state:
 - 0 duplicate components.
 - 44 SX-39 rentable_areas tracked (9 canonical approved + 9 canonical promoted + 26 legacy/other).
 - 34 areas occupied, 9 have no component, 1 has multiple active contracts (四区B栋首层).
-- 7 issued rent bills for 2026-05-01 (due 2026-05-05), total ¥327,422.00.
-- 1 draft rent bill remains: 杨华禾 (¥2,500.00, pending_review, review_before_approve).
-- 8 approval records: 7 approved by Matthew/admin, 1 pending_review.
+- **8 issued rent bills for 2026-05-01 (due 2026-05-05), total ¥329,922.00.**
+- **0 draft rent bills remaining.**
+- **8 approval records: all 8 approved by Matthew/admin, 0 pending_review.**
 - 0 issue-ready bills (all approved bills have been issued).
-- 2 billing holds documented: 川田 (master/sublease), 朱河芳 (expired).
+- 2 unbilled holds remain: 川田 (`keep_on_hold` per v2.6 — master/sublease, awaiting 靖大物业 master-lease rule), 朱河芳 (`pending_decision` — expired contract, awaiting 阮绮杨 renewal follow-up).
 - 0 payments recorded. 0 payment allocations recorded.
-- Total outstanding: ¥327,422.00.
-- 1 static HTML review page generated from live views.
+- **Total outstanding: ¥329,922.00.**
+- 1 static HTML review page can be regenerated from live views.
 - 1 Streamlit staff interface ready for payment recording.
 
 Next work should stay focused on Shaxi only.
 
 Recommended next action:
-1. Run `sql/03_verify_shaxi_v1.sql`.
-2. Run `sql/14_verify_shaxi_staff_reporting_views_v1_6.sql`.
-3. Run `sql/16_verify_shaxi_operating_views_v1_7.sql`.
-4. Run `sql/18_verify_shaxi_billing_foundation_v1_8.sql`.
-5. Run `sql/21_verify_shaxi_rent_bills_v1_9.sql`.
-6. Run `sql/23_verify_shaxi_bill_review_views_v2_0.sql`.
-7. Run `sql/26_verify_shaxi_bill_approval_workflow_v2_1.sql`.
-8. Run `sql/28_verify_issued_shaxi_bills_v2_2.sql`.
-9. Run `sql/30_verify_shaxi_payment_allocations_v2_3.sql`.
-10. Run `sql/31_verify_shaxi_staff_interface_support_v2_4.sql`.
-11. Regenerate review page: `python scripts/generate_shaxi_bill_review_page.py`.
-12. Confirm all safe counts still hold.
-13. Choose next path:
-    - **Path A** — Record actual payments against issued bills (via Streamlit app or manual SQL)
-    - **Path B** — Resolve held cases (川田 master/sublease, 朱河芳 renewal)
-    - **Path C** — Approve 杨华禾 (when contract review is complete)
-    - **Path D** — Make exception decisions via `shaxi_business_exception_reviews` table
-    - **Path E** — Extend to `SX-BCY` (only after Shaxi is fully trusted)
-14. Do not move to other sites until Shaxi has both reliable review loop AND trusted operating data.
+1. Run `sql/35_verify_shaxi_exception_decisions_v2_6.sql` to confirm v2.6 state still holds.
+2. Run earlier verifies (`03`, `14`, `16`, `18`, `21`, `23`, `26`, `28`, `30`, `31`, `33`) as needed.
+3. Regenerate review page: `python scripts/generate_shaxi_bill_review_page.py`.
+4. Confirm all safe counts still hold.
+5. Choose next path:
+    - **Path A** — Record actual payments against the 8 issued bills (via Streamlit app or manual SQL). ¥329,922.00 receivable.
+    - **Path B** — Resolve 朱河芳 renewal (阮绮杨 follow-up). Update `shaxi_business_exception_reviews` once decision is in.
+    - **Path C** — Confirm 川田 master-lease rent + rule at the 靖大物业 level. Generate the 靖大物业 master-lease bill if/when business confirms. NO direct 中铭 → 川田 bill.
+    - **Path D** — Extend to `SX-BCY` (only after Shaxi is fully trusted).
+6. Do not move to other sites until Shaxi has both reliable review loop AND trusted operating data.

@@ -1,5 +1,70 @@
 # CHANGELOG.md
 
+## 2026-04-29 (v2.6 — Apply Shaxi Exception Decisions)
+
+**Goal:** Apply the 3 captured business exception decisions from v2.5: keep 川田 on hold (master/sublease chain), approve and issue 杨华禾 May 2026 draft bill, leave 朱河芳 pending pending renewal follow-up.
+
+### v2.6: Decision Application
+- `sql/34_apply_shaxi_exception_decisions_v2_6.sql`
+  - 中山市川田制衣厂: `pending_decision` → `keep_on_hold`
+    - decision_note: "川田 pays rent to 靖大物业; 靖大物业 pays 中铭. Do not issue direct rent bill from 中铭 to 川田 unless policy changes. Future billing should be handled at 靖大物业/master-lease level if confirmed."
+    - No new `rent_bills` row created for 川田
+    - No new master-lease bill created for 靖大物业 (master rent + rule not yet confirmed)
+  - 杨华禾: `pending_decision` → `approved_to_issue`
+    - `bill_approval_reviews.review_status`: `pending_review` → `approved` (Matthew/admin)
+    - `rent_bills.bill_status`: `draft` → `issued` for bill `4adcf5d2-9b93-497b-b422-327a473e342a` (¥2,500.00)
+  - 朱河芳: NO CHANGE. Stays `pending_decision`. 阮绮杨 follow-up still in flight.
+  - All 4 UPDATEs are state-guarded (rerun produces `UPDATE 0` × 4). Idempotency confirmed against live DB.
+  - No INSERTs into `rent_bills`, `payments`, or `payment_allocations`.
+  - No expansion to SX-BCY.
+
+### v2.6: Verification
+- `sql/35_verify_shaxi_exception_decisions_v2_6.sql` — 31 checks
+  - 川田 decision_status = `keep_on_hold`, decision_note contains "靖大物业" + "中铭" + "Do not issue direct rent bill"
+  - 杨华禾 decision_status = `approved_to_issue`, bill_status = `issued`, review_status = `approved`, amount_due = ¥2,500.00
+  - 朱河芳 decision_status = `pending_decision`, decision_by IS NULL (truly unchanged)
+  - 川田 still unbilled (0 rent_bills rows for component `1a17c28c…`)
+  - 朱河芳 still unbilled (0 rent_bills rows for component `c47ac0c3…`)
+  - No 靖大物业 master-lease bill created for May 2026
+  - payments=0, payment_allocations=0
+  - issued bill count: 7 → **8**
+  - total outstanding: ¥327,422.00 → **¥329,922.00** (+¥2,500 for 杨华禾)
+  - remaining draft bills (May 2026 rent): 1 → **0**
+  - mapping_exceptions=0, billing_exceptions=0, payment_allocation_exceptions=0
+  - 0 duplicate bills, 0 unsafe-source bills
+  - Regression: v1.7 expiry_watch (10), occupancy_status (44), v1.8 billing_readiness (1), v1.9 billing_generation_summary (1) + billing_holds (10), v2.0 bill_review_queue (now 0), v2.1 approval_queue (8), v2.3 outstanding_bills (now 8) + payment_recording_queue (now 8), v2.5 exception_queue (3) — ALL PASS
+  - Result: **ALL 31 CHECKS PASSED**
+
+### Documentation Updates
+- `docs/SHAXI_HANDOVER_CURRENT.md` — updated to v2.6 with new decision rows, issued bill count 8, total outstanding ¥329,922, 0 remaining draft, exception breakdown 1 pending / 1 keep_on_hold / 1 approved_to_issue
+- `PROJECT_MEMORY.md` — updated current state, counts, unresolved items, SQL inventory rows 34/35
+- `TODO.md` — added v2.6 Delivered section, updated Current State summary, repointed Next Priority to 朱河芳 renewal follow-up + payment recording
+
+### Post-Verification Counts
+- `rentable_areas`: 44 (SX-39)
+- `contracts`: 13 (staged + pre-existing)
+- `lease_package_components`: 10 (safe, 0 pending)
+- `rent_bills`: **8 issued, 0 draft** (2026-05-01, rent)
+- `bill_approval_reviews`: **8 approved, 0 pending_review**
+- `shaxi_business_exception_reviews`: 3 (1 pending_decision / 1 keep_on_hold / 1 approved_to_issue)
+- `payments`: 0
+- `payment_allocations`: 0
+- Total issued amount: **¥329,922.00**
+- Total outstanding: **¥329,922.00**
+- Billing holds (true holds, unchanged): 2 (川田 master/sublease, 朱河芳 expired)
+- Mapping/billing/payment exceptions: 0
+- Duplicates: 0
+- Workflow status: `exceptions_pending_decision` (because 朱河芳 still pending)
+
+### Current Decision Required
+- **Path A** — Record actual payments against the now 8 issued bills (via Streamlit app or manual SQL). Total receivable: ¥329,922.00.
+- **Path B** — Resolve 朱河芳 (renewal vs vacancy) once 阮绮杨 confirms — then update `shaxi_business_exception_reviews` for 朱河芳.
+- **Path C** — If/when business confirms master lease rent and rule, generate the 靖大物业 master-lease bill (川田 chain). Until then, 川田 stays on hold.
+- **Path D** — Extend to `SX-BCY` (only after Shaxi is fully trusted).
+
+**Blocked from expanding to SX-BCY until Shaxi has both reliable review loop AND trusted operating data.**
+
+
 ## 2026-04-27 — Staff Bill Review Page v2.0 (UI)
 
 Created `scripts/generate_shaxi_bill_review_page.py` — Python 3 standard-library script that queries live Supabase views via psql and generates a static HTML review page.
