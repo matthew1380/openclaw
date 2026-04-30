@@ -1,12 +1,25 @@
 # TODO.md
 
 ## Current State
-Shaxi Rental OS v2.6 is complete. Confirmed exception decisions applied.
-**8 issued bills outstanding (¥329,922 total).** 0 payments recorded. 0 draft bills remain.
-2 unbilled holds remain (川田 keep_on_hold, 朱河芳 pending_decision).
+Shaxi Rental OS v2.7 is complete. Excel↔DB drift corrections applied + 华佑/刘英 master-lease May 2026 bills issued.
+**10 issued bills outstanding (¥684,922 total).** 0 payments recorded. 0 draft bills remain.
+2 unbilled holds remain (川田 keep_on_hold, 朱河芳 pending_decision). 1 master held (靖大 SX-C-008, awaiting rule confirmation).
 3 business exception reviews: 1 pending_decision (朱河芳), 1 keep_on_hold (川田), 1 approved_to_issue (杨华禾).
 0 mapping/billing/payment-allocation exceptions. 0 duplicate bills.
 Streamlit app available for payment recording and exception viewing. HTML review page can be regenerated.
+
+## v2.7 Delivered
+- `sql/36_apply_shaxi_excel_drift_corrections_v2_7.sql` — Excel↔DB drift fixes + 2 master-lease May 2026 bills (5 UPDATEs + 2 INSERTs into rent_bills + 2 INSERTs into bill_approval_reviews + 4 UPDATEs to approve/issue)
+  - End-date fixes: SX-C-006 珍美 + SX-C-010 刘英 `2027-10-30` → `2027-10-31`
+  - Start-date drift fixes: SX-C-001 兼熙, SX-C-002 华佑, SX-C-004 嘉睿(三层) shifted from 2025 to Excel's 2023 originals
+  - 华佑物业 (SX-C-002) May 2026 rent bill: ¥300,000.00 issued, approved by Matthew/admin
+  - 刘英 (SX-C-010) May 2026 rent bill: ¥55,000.00 issued, approved by Matthew/admin
+  - All UPDATEs/INSERTs state-guarded; rerun confirmed all 0 (idempotent).
+- `sql/37_verify_shaxi_excel_drift_corrections_v2_7.sql` — 21 checks, ALL PASSED
+  - Issued bills 8 → 10. Outstanding ¥329,922 → ¥684,922.
+  - 川田/朱河芳/靖大 master remain unbilled. payments=0, payment_allocations=0.
+  - No duplicate bills; every bill has exactly one approval row.
+- Deferred (still owed): 珍美 ¥1 rent diff (Excel inconsistent — staff confirming 补充协议), RA-SX39-Q4-A-GF area_sqm 1352.3 口径 (staff confirming), 鲸鸣 2027 escalation to ¥44,704.40 (matters Dec 2026), 靖大 master 109,337 May bill (rule still unconfirmed).
 
 ## v2.1 Delivered
 - `bill_approval_reviews` table created with `review_status` constraint
@@ -78,10 +91,10 @@ Streamlit app available for payment recording and exception viewing. HTML review
 ## Next Priority
 
 ### Path A — Record Actual Payments (Recommended next)
-- 8 issued bills now eligible for payment recording (¥329,922.00 total)
+- 10 issued bills now eligible for payment recording (¥684,922.00 total)
 - Use `scripts/shaxi_staff_app.py` to record payments via Streamlit interface
 - Or insert real payment receipts manually into `payments` + `payment_allocations`
-- Use `vw_shaxi_payment_recording_queue_v2_3` to target which bills to pay (8 rows)
+- Use `vw_shaxi_payment_recording_queue_v2_3` to target which bills to pay (note: view filters by `lpc.promotion_batch = 'shaxi_promotion_v1'`, so the 2 new master-lease bills [华佑/刘英] may not surface there — query `rent_bills` directly with `bill_status='issued'`)
 - Monitor `vw_shaxi_payment_allocation_exceptions_v2_3` for data quality
 - Regenerate the HTML review page to show updated payment status
 

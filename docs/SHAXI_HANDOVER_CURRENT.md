@@ -1,10 +1,10 @@
-# Shaxi Rental OS Handover — Current State After v2.6
+# Shaxi Rental OS Handover — Current State After v2.7
 
-_Last updated: 2026-04-29 after applying confirmed business exception decisions_
+_Last updated: 2026-04-30 after Excel↔DB drift corrections + 华佑/刘英 master-lease May 2026 bills_
 
 ## 1. Current Milestone
 
-The Shaxi Rental OS pilot has reached the **v2.6 exception-decisions-applied checkpoint**.
+The Shaxi Rental OS pilot has reached the **v2.7 Excel↔DB drift corrections + master-lease billing checkpoint**.
 
 All 9 promotion candidates have been resolved:
 - 6 approved in v1.3/v1.4
@@ -21,9 +21,10 @@ Staff-facing reporting views, operating-data views, billing foundation, controll
 - Outstanding bills view, payment recording queue, payment allocation exceptions (v2.3)
 - Streamlit staff interface for payment recording and dashboard (v2.4)
 - Business exception resolution workflow: 3 active reviews (川田, 朱河芳, 杨华禾) (v2.5)
-- **Confirmed exception decisions applied: 川田 keep_on_hold, 杨华禾 approved_to_issue (bill issued, ¥2,500), 朱河芳 unchanged (v2.6)**
+- Confirmed exception decisions applied: 川田 keep_on_hold, 杨华禾 approved_to_issue (bill issued, ¥2,500), 朱河芳 unchanged (v2.6)
+- **Excel↔DB drift corrections (5 contract date fields) + 华佑/刘英 master-lease May 2026 bills issued (¥355,000 total) (v2.7)**
 
-The system has safely moved from raw/staged Shaxi data into verified structured rental components with staff visibility, controlled billing, human-review queue, explicit approval gate, 8 issued bills with full traceability, structured business exception tracking, and **applied human decisions on those exceptions**. Zero unresolved candidates remain. Zero remaining draft bills.
+The system has safely moved from raw/staged Shaxi data into verified structured rental components with staff visibility, controlled billing, human-review queue, explicit approval gate, **10 issued bills (¥684,922) with full traceability**, structured business exception tracking, applied human decisions on those exceptions, and **first-pass Excel reconciliation for SX-39**. Zero unresolved candidates remain. Zero remaining draft bills.
 
 ---
 
@@ -43,14 +44,14 @@ The system has safely moved from raw/staged Shaxi data into verified structured 
 | Areas with no component | 9 |
 | Multiple-active areas | 1 |
 | Draft rent bills (2026-05-01) | 0 |
-| Issued rent bills (2026-05-01) | 8 |
+| Issued rent bills (2026-05-01) | 10 |
 | Bills in review queue | 0 |
-| Approval records (approved) | 8 |
+| Approval records (approved) | 10 |
 | Approval records (pending_review) | 0 |
 | Approval records (rejected) | 0 |
 | Approval records (needs_adjustment) | 0 |
 | Issue-ready bills | 0 |
-| Billing holds (true holds, unbilled) | 2 |
+| Billing holds (true holds, unbilled) | 2 (川田, 朱河芳) + 1 master held (靖大 SX-C-008) |
 | Business exception reviews | 3 |
 | Exception reviews pending_decision | 1 (朱河芳) |
 | Exception reviews keep_on_hold | 1 (川田) |
@@ -58,8 +59,8 @@ The system has safely moved from raw/staged Shaxi data into verified structured 
 | Exception reviews resolved | 0 |
 | Payments recorded | 0 |
 | Payment allocations recorded | 0 |
-| Total issued amount | ¥329,922.00 |
-| Total outstanding amount | ¥329,922.00 |
+| Total issued amount | ¥684,922.00 |
+| Total outstanding amount | ¥684,922.00 |
 
 ---
 

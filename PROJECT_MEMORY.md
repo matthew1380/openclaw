@@ -1,11 +1,22 @@
 # PROJECT_MEMORY.md
 
-## Current Working State (2026-04-29)
+## Current Working State (2026-04-30)
 
-### Shaxi pilot status — post v2.6
-The Shaxi promotion pipeline is now **live through safe lease_package_components creation with staff approval workflow, issued bills (8 for May 2026), payment recording views, Streamlit staff operating interface, business exception resolution workflow, and applied exception decisions (v2.6)**.
+### Shaxi pilot status — post v2.7
+The Shaxi promotion pipeline is now **live through safe lease_package_components creation with staff approval workflow, issued bills (10 for May 2026), payment recording views, Streamlit staff operating interface, business exception resolution workflow, applied exception decisions (v2.6), and Excel↔DB drift corrections + master-lease bill issuance (v2.7)**.
 
 Staging is complete. Promotion into final truth tables is in progress with strict review-first rules.
+
+### v2.7 contract date corrections (2026-04-30)
+Reconciled 5 contract rows against `imports/raw/租金汇总表20260420.xls`:
+
+| Contract | Field | Before | After | Excel source |
+|---|---|---|---|---|
+| SX-C-001 兼熙 | start_date | 2025-10-01 | 2023-10-01 | R40 |
+| SX-C-002 华佑 | start_date | 2025-11-01 | 2023-11-01 | R50 |
+| SX-C-004 嘉睿(三层) | start_date | 2025-10-01 | 2023-10-01 | R41 |
+| SX-C-006 珍美 | end_date | 2027-10-30 | 2027-10-31 | R44 |
+| SX-C-010 刘英 | end_date | 2027-10-30 | 2027-10-31 | R52 |
 
 ---
 
@@ -158,11 +169,12 @@ All promoted data uses batch identifier: **`shaxi_promotion_v1`**
 - `scripts/requirements.txt` — `streamlit` dependency
 - `docs/SHAXI_STAFF_INTERFACE_V2_4.md` — interface documentation
 
-**Issued bills (after v2.6):**
-- 8 May 2026 rent bills issued for: 素语服饰, 陈盼, 兼熙服饰, 嘉睿服饰(3层), 鲸鸣服饰, 珍美商贸, 嘉睿服饰(1层3卡), **杨华禾 (issued in v2.6, ¥2,500.00)**
+**Issued bills (after v2.7):**
+- 10 May 2026 rent bills issued for: 素语服饰, 陈盼, 兼熙服饰, 嘉睿服饰(3层), 鲸鸣服饰, 珍美商贸, 嘉睿服饰(1层3卡), 杨华禾 (v2.6, ¥2,500.00), **华佑物业 (v2.7, ¥300,000.00, master-lease)**, **刘英 (v2.7, ¥55,000.00, master-lease)**
 - 0 draft bills remain
-- Total issued amount: ¥329,922.00
-- Total outstanding: ¥329,922.00 (0 payments recorded)
+- Total issued amount: ¥684,922.00
+- Total outstanding: ¥684,922.00 (0 payments recorded)
+- Note: the 2 master-lease bills (华佑/刘英) were booked against legacy long-name `lease_package_components` rows (`RA-ZS-SX-U001`, `RA-ZS-SX-U011`) — these are NOT tagged `promotion_batch = 'shaxi_promotion_v1'`, so they don't appear in `vw_shaxi_rent_bill_candidates_v1_9` or downstream payment-recording-queue views that filter by that batch tag. Query `rent_bills` directly when handling them.
 
 **Known billing holds (tracked in `shaxi_business_exception_reviews`):**
 - 川田 (四区B栋首层) — `billing_hold`: multiple_active area (靖大物业 master lease + 川田 sublease)
@@ -242,6 +254,8 @@ All promoted data uses batch identifier: **`shaxi_promotion_v1`**
 | 33 | `sql/33_verify_shaxi_exception_resolution_workflow_v2_5.sql` | Verify exception resolution workflow | ✅ Active |
 | 34 | `sql/34_apply_shaxi_exception_decisions_v2_6.sql` | Apply confirmed exception decisions (川田 keep_on_hold, 杨华禾 approved_to_issue + bill issued, 朱河芳 unchanged) | ✅ Executed |
 | 35 | `sql/35_verify_shaxi_exception_decisions_v2_6.sql` | Verify v2.6 decisions (31 checks, ALL PASSED) | ✅ Active |
+| 36 | `sql/36_apply_shaxi_excel_drift_corrections_v2_7.sql` | Excel↔DB drift fixes + 华佑/刘英 master-lease May 2026 bills (5 UPDATEs + bill insert/approve/issue) | ✅ Executed |
+| 37 | `sql/37_verify_shaxi_excel_drift_corrections_v2_7.sql` | Verify v2.7 drift corrections + master-lease bills (21 checks, ALL PASSED) | ✅ Active |
 | — | `scripts/generate_shaxi_bill_review_page.py` | Generate static HTML bill review page | ✅ Active |
 | — | `scripts/shaxi_staff_app.py` | Streamlit staff operating interface | ✅ Active |
 | — | `scripts/requirements.txt` | Python dependencies | ✅ Active |
@@ -278,12 +292,17 @@ Stable enough for current stage:
 
 ---
 
-### Known unresolved items (after v2.6)
+### Known unresolved items (after v2.7)
 1. **1 business exception** still `pending_decision` in `shaxi_business_exception_reviews`:
    - 朱河芳 (三区A栋首层2卡) — `expired_contract`: contract SX-C-011 ended 2026-04-30. Renewal pending with 阮绮杨 follow-up. **Do not bill until confirmed.**
 2. **1 business exception** on hold pending external confirmation:
    - 中山市川田制衣厂 (四区B栋首层) — `keep_on_hold` (decided in v2.6): 川田 pays 靖大物业 → 靖大物业 pays 中铭. Future billing must happen at 靖大物业/master-lease level once master rent + rule are confirmed. **No direct 中铭 → 川田 bill.**
-3. **0 unresolved draft bills.** 杨华禾 was approved + issued in v2.6 (¥2,500.00).
+3. **0 unresolved draft bills.**
+4. **靖大 master (SX-C-008) ¥109,337/month still unbilled** — v2.6 deferral upheld in v2.7. The ¥109,337 figure has no Excel evidence and the contract end is 2026-10-31. Confirm rent + rule before generating any master-lease bill.
+5. **Awaiting staff confirmation (Chinese questions sent 2026-04-30):**
+   - 珍美 SX-C-006 月租 ¥1 差异 (Excel 应收每月租金 ¥36,301.77 vs 同行备注 ¥36,302.77; DB has ¥36,302.77 — needs 补充协议 scan).
+   - 四区A栋首层 1352.3m² 口径 (whole-floor vs GF-remainder semantics).
+6. **Schedule before Dec 2026:** 鲸鸣 (SX-C-009) 2027 escalation to ¥44,704.40/month (Excel R43 备注).
 
 2. **Legacy long-name rentable_areas** exist alongside new canonical short-name areas:
    - e.g., `RA-ZS-SX-U012` (long) vs `RA-SX39-Q4-B-GF` (short) for 四区B栋首层

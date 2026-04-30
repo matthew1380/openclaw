@@ -1,5 +1,60 @@
 # CHANGELOG.md
 
+## 2026-04-30 (v2.7 — Shaxi Excel↔DB Drift Corrections + Master-Lease Bills)
+
+**Goal:** Reconcile DB with `imports/raw/租金汇总表20260420.xls` for the unambiguous discrepancies surfaced by the 2026-04-30 diff, and generate the previously-missing May 2026 rent bills for 华佑物业 and 刘英 (the two master-lease tenants with direct Excel evidence).
+
+### v2.7: Drift Corrections + Master-Lease Bill Issuance
+- `sql/36_apply_shaxi_excel_drift_corrections_v2_7.sql`
+  - **End-date fixes (off-by-one-day):**
+    - SX-C-006 珍美商贸 `2027-10-30` → `2027-10-31` (Excel R44 + 备注)
+    - SX-C-010 刘英 `2027-10-30` → `2027-10-31` (Excel R52)
+  - **Start-date drift fixes (DB had 2025 originals; Excel has 2023):**
+    - SX-C-001 兼熙服饰 `2025-10-01` → `2023-10-01` (Excel R40)
+    - SX-C-002 华佑物业 `2025-11-01` → `2023-11-01` (Excel R50)
+    - SX-C-004 嘉睿服饰 (三层) `2025-10-01` → `2023-10-01` (Excel R41)
+  - **Master-lease May 2026 bills (Matthew/admin authorized):**
+    - 中铭→华佑物业 (SX-C-002, 一区/二区): bill `2188bd2c-2b4d-48a4-94c0-b5e3453bce0f`, ¥300,000.00, draft → approved → issued
+    - 中铭→刘英 (SX-C-010, 四区A/B宿舍2-4楼): bill `28827da7-4768-4274-92f1-76cf465fffb4`, ¥55,000.00, draft → approved → issued
+    - Both bills booked against the legacy long-name `lease_package_components` rows (`RA-ZS-SX-U001` and `RA-ZS-SX-U011`) since they holistically represent each master-lease scope.
+  - All UPDATEs/INSERTs state-guarded; rerun confirmed `UPDATE 0 / INSERT 0 0` across the board (idempotent).
+  - No INSERTs into `payments` or `payment_allocations`. No expansion to SX-BCY.
+  - Out of scope by design: 珍美 ¥1 rent diff (Excel column 36,301.77 vs 备注 36,302.77 — staff confirming 补充协议), RA-SX39-Q4-A-GF area_sqm backfill (1352.3m² 口径 unconfirmed), 鲸鸣 2027 escalation to ¥44,704.40 (Dec 2026 only), 靖大 master (SX-C-008) ¥109,337 May bill (v2.6 hold; rule still unconfirmed).
+
+### v2.7: Verification
+- `sql/37_verify_shaxi_excel_drift_corrections_v2_7.sql` — 21 checks
+  - A. Contract date corrections (5 checks): all 5 dates match Excel.
+  - B. New rent_bills exist (6 checks): 华佑 + 刘英 each have exactly one May 2026 rent bill at the right amount and status `issued`.
+  - C. Approval rows (4 checks): both bills have `review_status = approved`, `reviewed_by = Matthew/admin`.
+  - D. Aggregates (3 checks): 10 issued / 0 draft / total `¥684,922.00`.
+  - E. Negative-state guarantees (6 checks): 川田 still 0 bills, 朱河芳 still 0 bills, 靖大 master (SX-C-008) still no May bill, payments=0, payment_allocations=0, exception reviews row counts unchanged.
+  - F. Idempotency probe (2 checks): no duplicate (component, month, type) bills; every May 2026 bill has exactly one approval row.
+  - Result: **ALL 21 CHECKS PASSED**
+
+### Documentation Updates
+- `docs/SHAXI_HANDOVER_CURRENT.md` — bumped to v2.7 with new counts (10 issued, ¥684,922 outstanding) and added master-lease bill notes.
+- `PROJECT_MEMORY.md` — updated current state, counts, contract date table, SQL inventory rows 36/37.
+- `TODO.md` — added v2.7 Delivered section, refreshed Current State and Path A.
+
+### Post-Verification Counts
+- `contracts`: 13 (unchanged count; 5 had date fields corrected).
+- `rent_bills`: **10 issued, 0 draft** (2026-05-01, rent).
+- `bill_approval_reviews`: **10 approved, 0 pending_review**.
+- `shaxi_business_exception_reviews`: 3 (1 pending_decision / 1 keep_on_hold / 1 approved_to_issue) — unchanged.
+- `payments`: 0. `payment_allocations`: 0.
+- Total issued amount: **¥684,922.00**.
+- Total outstanding: **¥684,922.00**.
+- Mapping/billing/payment exceptions: 0. Duplicates: 0.
+- Workflow status: `exceptions_pending_decision` (because 朱河芳 still pending).
+
+### Open Items
+- **Awaiting staff** (Chinese questions sent 2026-04-30): 珍美 ¥1 rent canonical figure, RA-SX39-Q4-A-GF 1352.3m² 口径.
+- **Awaiting business** (still): 靖大 master rent + billing rule confirmation, 朱河芳 renewal vs vacancy decision.
+- **Schedule before Dec 2026:** 鲸鸣 2027 escalation to ¥44,704.40.
+
+**Blocked from expanding to SX-BCY until Shaxi has both reliable review loop AND trusted operating data.**
+
+
 ## 2026-04-29 (v2.6 — Apply Shaxi Exception Decisions)
 
 **Goal:** Apply the 3 captured business exception decisions from v2.5: keep 川田 on hold (master/sublease chain), approve and issue 杨华禾 May 2026 draft bill, leave 朱河芳 pending pending renewal follow-up.
