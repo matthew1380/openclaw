@@ -1,5 +1,36 @@
 # CHANGELOG.md
 
+## 2026-04-30 (web v0.1 — Next.js console scaffold)
+
+**Goal:** Replace the v2.4 Streamlit app with a real multi-user Next.js console. First milestone is a runnable read-only skeleton with EN/ZH toggle, showing live SX-39 data.
+
+### Scaffold
+- `web/` — Next.js 16 + React 19 + Tailwind 4 (Turbopack) project.
+- Server Components fetch live SX-39 data via `pg` against the Supabase Session Pooler. No anon-key reads from the browser; auth wiring is the next milestone.
+- i18n via the built-in dictionary pattern (`/[lang]/...`, `getDictionary`, `en.json` + `zh.json`). Default locale `zh`. Top-right toggle swaps in place.
+- `proxy.ts` (Next 16's renamed `middleware.ts`) redirects unprefixed paths to the locale chosen from `Accept-Language`.
+- 4 routes: `/[lang]` (redirect), `/[lang]/dashboard`, `/[lang]/bills`, `/[lang]/exceptions`.
+
+### What it shows
+Pulled directly from `rent_bills` / `bill_approval_reviews` / `shaxi_business_exception_reviews` (deliberately bypassing the `vw_shaxi_*_v1_9` views, which filter by `promotion_batch` and would hide the v2.7 master-lease bills):
+- 10 issued bills, ¥684,922.00 outstanding (incl. 华佑 ¥300k + 刘英 ¥55k).
+- 3 active exceptions: 川田 keep_on_hold, 朱河芳 pending_decision, 杨华禾 approved_to_issue.
+- Translated decision statuses + currency formatting per locale.
+
+### Not yet built (deferred)
+- Auth (Supabase magic link), role separation (staff vs admin), payment recording, exception decision UI, bill-approval mutations, WeChat tenant Mini Program / staff 企业微信 integration.
+- Build / typecheck pass; production build verified.
+
+### Files added
+- `web/package.json`, `web/tsconfig.json`, `web/next.config.ts`, `web/postcss.config.mjs` (default scaffold)
+- `web/src/app/{layout.tsx,globals.css}`
+- `web/src/app/[lang]/{layout.tsx,page.tsx,dashboard/page.tsx,bills/page.tsx,exceptions/page.tsx}`
+- `web/src/components/{nav.tsx,language-toggle.tsx}`
+- `web/src/lib/{db.ts,dictionaries/{index.ts,en.json,zh.json},shaxi/queries.ts}`
+- `web/src/proxy.ts`
+- `web/README.md`, `web/.env.local.example`
+
+
 ## 2026-04-30 (v2.7 — Shaxi Excel↔DB Drift Corrections + Master-Lease Bills)
 
 **Goal:** Reconcile DB with `imports/raw/租金汇总表20260420.xls` for the unambiguous discrepancies surfaced by the 2026-04-30 diff, and generate the previously-missing May 2026 rent bills for 华佑物业 and 刘英 (the two master-lease tenants with direct Excel evidence).

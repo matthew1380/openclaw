@@ -1,0 +1,64 @@
+{
+  "common": {
+    "appName": "Rental OS",
+    "site": "Shaxi (SX-39)",
+    "switchLanguage": "中文",
+    "loading": "Loading…",
+    "error": "Error",
+    "currency": "¥"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "bills": "Bills",
+    "exceptions": "Exceptions",
+    "contracts": "Contracts",
+    "login": "Sign in"
+  },
+  "dashboard": {
+    "title": "Operating Dashboard",
+    "subtitle": "Live state for the Shaxi pilot",
+    "asOf": "As of",
+    "billingMonth": "Billing month",
+    "cards": {
+      "issuedCount": "Issued bills",
+      "issuedTotal": "Issued total",
+      "outstanding": "Outstanding",
+      "draftCount": "Draft bills",
+      "exceptionsPending": "Exceptions pending",
+      "holds": "Bills on hold"
+    },
+    "tables": {
+      "issuedBills": "Issued May 2026 rent bills",
+      "exceptions": "Active business exceptions"
+    },
+    "columns": {
+      "tenant": "Tenant",
+      "area": "Area",
+      "amount": "Amount",
+      "status": "Status",
+      "approvedBy": "Approved by",
+      "exceptionType": "Type",
+      "decisionStatus": "Decision",
+      "decisionBy": "Decided by",
+      "noteSnippet": "Note"
+    }
+  },
+  "exceptions": {
+    "pending_decision": "Pending decision",
+    "approved_to_issue": "Approved (issued)",
+    "keep_on_hold": "Held",
+    "approved_to_bill": "Approved (bill)",
+    "mark_vacant": "Vacant",
+    "renewed_contract_needed": "Renewal needed",
+    "needs_adjustment": "Adjustment needed",
+    "resolved": "Resolved",
+    "expired_contract": "Expired contract",
+    "billing_hold": "Billing hold",
+    "pending_draft_bill": "Draft bill pending"
+  },
+  "auth": {
+    "loginTitle": "Sign in",
+    "loginHint": "Auth is not yet wired in this build. Tap continue to enter the dev dashboard.",
+    "continue": "Continue"
+  }
+}

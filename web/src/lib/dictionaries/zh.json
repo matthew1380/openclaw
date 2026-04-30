@@ -1,0 +1,64 @@
+{
+  "common": {
+    "appName": "租赁运营系统",
+    "site": "沙溪（SX-39）",
+    "switchLanguage": "English",
+    "loading": "加载中…",
+    "error": "错误",
+    "currency": "¥"
+  },
+  "nav": {
+    "dashboard": "仪表盘",
+    "bills": "账单",
+    "exceptions": "异常",
+    "contracts": "合同",
+    "login": "登录"
+  },
+  "dashboard": {
+    "title": "运营仪表盘",
+    "subtitle": "沙溪试点实时状态",
+    "asOf": "截至",
+    "billingMonth": "账单月份",
+    "cards": {
+      "issuedCount": "已开账单",
+      "issuedTotal": "已开金额",
+      "outstanding": "未收金额",
+      "draftCount": "草稿账单",
+      "exceptionsPending": "待决异常",
+      "holds": "暂挂账单"
+    },
+    "tables": {
+      "issuedBills": "2026年5月已开租金账单",
+      "exceptions": "当前业务异常"
+    },
+    "columns": {
+      "tenant": "租客",
+      "area": "区域",
+      "amount": "金额",
+      "status": "状态",
+      "approvedBy": "审批人",
+      "exceptionType": "类型",
+      "decisionStatus": "决议",
+      "decisionBy": "决议人",
+      "noteSnippet": "备注"
+    }
+  },
+  "exceptions": {
+    "pending_decision": "待决议",
+    "approved_to_issue": "已批准（已开票）",
+    "keep_on_hold": "暂挂",
+    "approved_to_bill": "已批准（出账）",
+    "mark_vacant": "标记空置",
+    "renewed_contract_needed": "需续签",
+    "needs_adjustment": "需调整",
+    "resolved": "已结清",
+    "expired_contract": "合同到期",
+    "billing_hold": "账单暂挂",
+    "pending_draft_bill": "草稿账单待定"
+  },
+  "auth": {
+    "loginTitle": "登录",
+    "loginHint": "本版本暂未接入登录系统。点击继续进入演示仪表盘。",
+    "continue": "继续"
+  }
+}
